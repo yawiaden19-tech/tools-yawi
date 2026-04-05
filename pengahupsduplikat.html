@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Quantum Tool - Yawi</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background:
+    linear-gradient(rgba(5,5,10,0.9), rgba(5,5,10,0.95)),
+    url('https://images.unsplash.com/photo-1518770660439-4636190af475');
+  background-size: cover;
+  background-position: center;
+  color: #e0e0ff;
+  display: flex;
+  justify-content: center;
+  padding: 30px;
+}
+
+/* CONTAINER */
+.container {
+  width: 900px;
+  backdrop-filter: blur(15px);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 25px;
+  box-shadow: 0 0 40px rgba(120, 0, 255, 0.2);
+}
+
+/* TITLE */
+h1 {
+  text-align: center;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 22px;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg, #7a5cff, #00d4ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* PROFILE */
+.profile {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.profile img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid #7a5cff;
+  box-shadow: 0 0 20px rgba(122,92,255,0.7);
+  transition: 0.3s;
+}
+
+.profile img:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 30px rgba(0,200,255,0.9);
+}
+
+.name {
+  text-align: center;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #aaa;
+}
+
+/* INPUT */
+input[type="file"] {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(0,0,0,0.4);
+  color: #fff;
+}
+
+/* BUTTONS */
+.controls {
+  margin-top: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+button {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  background: linear-gradient(135deg, #6a5cff, #00cfff);
+  color: #fff;
+  transition: 0.3s;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px rgba(0,200,255,0.5);
+}
+
+/* CHECKBOX */
+label {
+  font-size: 13px;
+  color: #aaa;
+}
+
+/* OUTPUT */
+#output {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.6);
+  font-family: monospace;
+  font-size: 13px;
+  min-height: 220px;
+  overflow-y: auto;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* DOWNLOAD */
+#downloadLink {
+  text-decoration: none;
+  font-size: 13px;
+  color: #00d4ff;
+}
+
+/* STATS */
+.stats {
+  font-size: 12px;
+  color: #777;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>⚡ QUANTUM TEXT TOOL ⚡</h1>
+
+<div class="profile">
+  <div>
+    <img src="https://pub-ab4fd924ef6c48b58c7f28782dba52b3.r2.dev/judolhoki88raja.png">
+    <div class="name">Yawi Aden</div>
+  </div>
+</div>
+
+<input type="file" id="fileInput" accept=".txt">
+
+<div class="controls">
+  <button onclick="process()">Process</button>
+  <label><input type="checkbox" id="dedupe"> Remove duplicate lines</label>
+  <button onclick="copy()">Copy</button>
+  <a id="downloadLink" style="display:none;">Download</a>
+  <span class="stats" id="stats"></span>
+</div>
+
+<div id="output"></div>
+
+</div>
+
+<script>
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+function process() {
+  let file = document.getElementById("fileInput").files[0];
+  if (!file) return alert("Upload file dulu");
+
+  let reader = new FileReader();
+
+  reader.onload = function(e) {
+    let lines = e.target.result.split(/\r?\n/).filter(l => l.trim());
+    let before = lines.length;
+
+    if (document.getElementById("dedupe").checked) {
+      let set = new Set();
+      lines = lines.filter(l => {
+        if (set.has(l)) return false;
+        set.add(l);
+        return true;
+      });
+    }
+
+    let after = lines.length;
+
+    shuffle(lines);
+
+    let result = lines.join("\n");
+
+    document.getElementById("output").textContent = result;
+    document.getElementById("stats").textContent = `Lines: ${before} → ${after}`;
+
+    let blob = new Blob([result], {type:'text/plain'});
+    let url = URL.createObjectURL(blob);
+
+    let dl = document.getElementById("downloadLink");
+    dl.href = url;
+    dl.style.display = "inline";
+  };
+
+  reader.readAsText(file);
+}
+
+function copy() {
+  let text = document.getElementById("output").textContent;
+  navigator.clipboard.writeText(text);
+  alert("Copied!");
+}
+</script>
+
+</body>
+</html>
